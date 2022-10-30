@@ -1,7 +1,6 @@
 bomPrecoEstacionamento(6).
 precoMaximo(12).
-tempoEsperaMaximo(0).
-utilidade(0.6).
+tempoEsperaMaximo(5).
 
 !trafegar.
 
@@ -15,24 +14,26 @@ utilidade(0.6).
     .print("O agente deseja estacionar");
     .send(controlador, tell, pedidoEstacionamento);
     .print("Esperando pela oferta do estacionamento");
-    .wait(proposta(Preco, TempoEspera)).
+    .wait(negociar(Preco, TempoEspera)).
 
 
-+!proposta(_, TempoEspera)[source(controlador)] : tempoEsperaMaximo(T) & TempoEspera > T <-
++!negociar(_, TempoEspera)[source(controlador)] : tempoEsperaMaximo(T) & TempoEspera > T <-
     .print("O tempo de espera é maior do que o que eu posso aceitar");
     .print("Cancelando o pedido de estacionamento");
     !cancelarOferta.
 
 
-+!proposta(Preco, TempoEspera)[source(controlador)] : 
-    utilidade(Util) & Util > 0.7 <-
-    .print("A oferta fornece uma utilidade razoável para mim");
-    !aceitarOferta.
-
-+!proposta(Preco, TempoEspera)[source(controlador)] : 
-     utilidade(Util) & Util < 0.7 <-
-    .print("A oferta não é razoavel para mim");
-    !rejeitarOferta.
++!negociar(Preco, TempoEspera)[source(controlador)] <- 
+    ?calcularUtilidade(Preco, TempoEspera, Util);
+    .print("Utilidade da oferta", Util);
+    if (Util > 0.7) {
+        .print("A oferta fornece uma utilidade razoável para mim.");
+        .print("Preco por hora : ", Preco, " Tmpo Espera: ", TempoEspera);
+        !aceitarOferta;
+    } else {
+        .print("A oferta não é razoável para mim");
+        !rejeitarOferta;
+    }.
 
 +!aceitarOferta <-
     .print("Aceitando a oferta");
@@ -62,16 +63,16 @@ utilidade(0.6).
 
 +!cancelarOferta <-
     .send(controlador, tell, cancelarOferta);
-    -proposta(_, _)[source(controlador)];
+    -negociar(_, _)[source(controlador)];
     !trafegar.
 
 
 
-+calcularUtilidade(Preco, TempoEspera) <-
-    bomPrecoEstacionamento(B);
-    precoMaximo(M);
-    -utilidade(_);
-    +utilidade((M - Preco) / B).
++?calcularUtilidade(Preco, TempoEspera, Util) <-
+    ?bomPrecoEstacionamento(B);
+    ?precoMaximo(M);
+    ?tempoEsperaMaximo(T);
+    Util = 0.8 * ((M - Preco) / B) - 0.1 * TempoEspera / T.
 
 
 
