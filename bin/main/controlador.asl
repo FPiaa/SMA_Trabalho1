@@ -4,7 +4,13 @@ precoMinimo(6).
 precoDesejado(10).
 
 
-!controlar.
+!start.
+
++!start <-
+    makeArtifact("filaEntrada", "estacionamento.FilaEntrada", [], IdFilaEntrada);
+    focus(IdFilaEntrada);
+    .print("O agente já está observando a fila de entrada");
+    !controlar.
 
 +pedidoEstacionamento[source(Ag)] : vagasLivres(X) & X > 0 & precoDesejado(P) <-
     .print("O estacionamento possui vagas, enviando o preco para o agente");
