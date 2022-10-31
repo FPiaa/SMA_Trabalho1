@@ -1,14 +1,16 @@
 package estacionamento;
 
-import cartago.*;
-import model.AgentRequest;
-
 import java.util.PriorityQueue;
+
+import cartago.Artifact;
+import cartago.OPERATION;
+import cartago.OpFeedbackParam;
+import model.AgentRequest;
 
 public class FilaEntrada extends Artifact {
     PriorityQueue<AgentRequest> filaEntrada = new PriorityQueue<>();
     static String requisicao = "requisicao";
-    static String sinal = "pedidoEstacionamento";
+    static String sinal = "novoVeiculo";
 
     void init() {
         defineObsProperty(requisicao);
@@ -23,10 +25,12 @@ public class FilaEntrada extends Artifact {
     }
 
     @OPERATION
-    void popRequestParking(OpFeedbackParam<AgentRequest> agentRequest) {
+    void popRequestParking(OpFeedbackParam<String> name, OpFeedbackParam<String> dataSaida) {
         // não é problematico ser null,
         // essa função só será chamada quando o agente controlador
         // receber o sinal de que alguem chegou para estacionar.
-        agentRequest.set(filaEntrada.poll());
+        AgentRequest a = filaEntrada.poll();
+        name.set(a.nome);
+        dataSaida.set(a.finalEstadia.toString());
     }
 }
