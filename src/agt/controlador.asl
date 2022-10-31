@@ -1,7 +1,7 @@
 tempoEspera(10).
-vagasLivres(0).
+vagasLivres(2).
 precoMinimo(6).
-precoDesejado(12).
+precoDesejado(10).
 
 
 !start.
@@ -28,18 +28,19 @@ precoDesejado(12).
     +negociar(Ag, P, T, 4);
     .send(Ag, achieve, negociar(P, T)).
 
-+ofertaAceita[source(Ag)] <-
++ofertaAceita[source(Ag)] : .concat("", Ag, A) <-
     .print("A vaga 1 será ocupada");
     ?vagasLivres(Qtd);
     -+vagasLivres(Qtd-1);
-    .send(Ag, tell, vagaEstacionar(1));
-    -negociar(Ag, _, _, _);
+    .send(A, tell, vagaEstacionar(1));
+    -negociar(A, _, _, _);
     -ofertaAceita[source(Ag)];
-    -pedidoEstacionamento[source(Ag)].
+    -pedidoEstacionamento(A, _).
 
 +ofertaRejeitada[source(Ag)] : .concat("", Ag, A) & negociar(A, P, E, Tentativas) & Tentativas > 0 <-
     .print("O agente ", Ag, " rejeitou a proposta, enviando contraproposta");
-    -+negociar(A, P-1, E, Tentativas-1);
+    -negociar(A, _, _, _);
+    +negociar(A, P-1, E, Tentativas-1);
     -ofertaRejeitada[source(Ag)];
     .send(Ag, achieve, negociar(P-1, E)).
 
