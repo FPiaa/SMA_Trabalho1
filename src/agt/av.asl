@@ -1,6 +1,9 @@
 bomPrecoEstacionamento(6).
 precoMaximo(12).
-tempoEsperaMaximo(5).
+tempoEsperaMaximo(10).
+prioritario(false).
+tempoPermanencia(15).
+
 
 !trafegar.
 
@@ -10,9 +13,11 @@ tempoEsperaMaximo(5).
     !estacionar.
 
 
-+!estacionar <-
++!estacionar : .my_name(N) & prioritario(P) & tempoPermanencia(T) <-
     .print("O agente deseja estacionar");
-    .send(controlador, tell, pedidoEstacionamento);
+    !locateFilaEntrada(Id);
+    focus(Id);
+    requestParking(N, P, T);
     .print("Esperando pela oferta do estacionamento");
     .wait(negociar(Preco, TempoEspera)).
 
@@ -76,3 +81,9 @@ tempoEsperaMaximo(5).
 
 
 
++!locateFilaEntrada(Id) <-
+    lookupArtifact("filaEntrada", Id).
+
+-!locateFilaEntrada(Id) <-
+    .wait(10);
+    !locateFilaEntrada.

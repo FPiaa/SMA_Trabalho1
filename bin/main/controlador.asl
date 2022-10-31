@@ -1,7 +1,7 @@
 tempoEspera(10).
 vagasLivres(0).
 precoMinimo(6).
-precoDesejado(10).
+precoDesejado(12).
 
 
 !start.
@@ -12,13 +12,19 @@ precoDesejado(10).
     .print("O agente já está observando a fila de entrada");
     !controlar.
 
-+pedidoEstacionamento[source(Ag)] : vagasLivres(X) & X > 0 & precoDesejado(P) <-
++novoVeiculo <-
+    popRequestParking(Ag, Duration);
+    // encontre a vaga para o agente;
+    +pedidoEstacionamento(Ag, Duration).
+
+
++pedidoEstacionamento(Ag, _): vagasLivres(X) & X > 0 & precoDesejado(P) <-
     .print("O estacionamento possui vagas, enviando o preco para o agente");
     +negociar(Ag, P, 0, 4);
     .send(Ag, achieve, negociar(P, 0)).
 
-+pedidoEstacionamento[source(Ag)] : vagasLivres(X) & X == 0 & precoDesejado(P) & tempoEspera(T) <-
-    .print("O estacionamento está lotado, enviando o preco e o tempo de espera para o VA");
++pedidoEstacionamento(Ag, _): vagasLivres(X) & X == 0 & precoDesejado(P) & tempoEspera(T) <-
+    .print("O estacionamento está lotado, enviando o preco e o tempo de espera para ", Ag);
     +negociar(Ag, P, T, 4);
     .send(Ag, achieve, negociar(P, T)).
 
@@ -31,24 +37,24 @@ precoDesejado(10).
     -ofertaAceita[source(Ag)];
     -pedidoEstacionamento[source(Ag)].
 
-+ofertaRejeitada[source(Ag)] : negociar(Ag, P, E, Tentativas) & Tentativas > 0 <-
++ofertaRejeitada[source(Ag)] : .concat("", Ag, A) & negociar(A, P, E, Tentativas) & Tentativas > 0 <-
     .print("O agente ", Ag, " rejeitou a proposta, enviando contraproposta");
-    -+negociar(Ag, P-1, E, Tentativas-1);
+    -+negociar(A, P-1, E, Tentativas-1);
     -ofertaRejeitada[source(Ag)];
     .send(Ag, achieve, negociar(P-1, E)).
 
-+ofertaRejeitada[source(Ag)] <-
++ofertaRejeitada[source(Ag)]: .concat("", Ag, A) <-
     .print("Nao foi possivel negociar com o agente ", Ag);
-    -negociar(Ag, _, _, _);
+    -negociar(A, _, _, _);
     -ofertaRejeitada[source(Ag)];
-    -pedidoEstacionamento[source(Ag)];
-    .send(Ag, tell, cancelarNegociacao).
+    -pedidoEstacionamento(A, _);
+    .send(A, tell, cancelarNegociacao).
 
-+cancelarOferta[source(Ag)] <-
++cancelarOferta[source(Ag)]: .concat("", Ag, A) <-
     .print("Cancelando a requisicao do agente ", Ag);
-    -negociar(Ag, _, _, _);
+    -negociar(A, _, _, _);
     -cancelarOferta[source(Ag)];
-    -pedidoEstacionamento[source(Ag)].
+    -pedidoEstacionamento(A, _).
 
 +!liberarVaga(V)[source(Ag)] <-
     ?vagasLivres(Qtd);
