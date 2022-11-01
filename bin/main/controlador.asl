@@ -1,5 +1,4 @@
 tempoEspera(10).
-vagasLivres(2).
 precoMinimo(6).
 precoDesejado(10).
 
@@ -9,59 +8,69 @@ precoDesejado(10).
 +!start <-
     makeArtifact("filaEntrada", "estacionamento.FilaEntrada", [], IdFilaEntrada);
     focus(IdFilaEntrada);
+    makeArtifact("vagas", "estacionamento.Vagas", [], IdVagas);
+    focus(IdVagas);
     .print("O agente já está observando a fila de entrada");
     !controlar.
 
 +novoVeiculo <-
     popRequestParking(Ag, Duration);
-    // encontre a vaga para o agente;
-    +pedidoEstacionamento(Ag, Duration).
+    numberOfEmptySpots(X);
+    +vagasLivres(X);
+    reserveSpot(Spot);
+    +pedidoEstacionamento(Ag, Duration, Spot).
 
 
-+pedidoEstacionamento(Ag, _): vagasLivres(X) & X > 0 & precoDesejado(P) <-
-    .print("O estacionamento possui vagas, enviando o preco para o agente");
++pedidoEstacionamento(Ag, _, Spot): vagasLivres(X) & X > 0 & precoDesejado(P) <-
+    .print("O estacionamento possui vagas, enviando o preco ", P, " para o agente ", Ag);
     +negociar(Ag, P, 0, 4);
     .send(Ag, achieve, negociar(P, 0)).
 
-+pedidoEstacionamento(Ag, _): vagasLivres(X) & X == 0 & precoDesejado(P) & tempoEspera(T) <-
-    .print("O estacionamento está lotado, enviando o preco e o tempo de espera para ", Ag);
++pedidoEstacionamento(Ag, _, Spot): vagasLivres(X) & X == 0 & precoDesejado(P) <-
+    getWaitTime(T);
+    .print("O estacionamento está lotado, enviando o preco ", P, " e o tempo de espera ", T, " minutos para ", Ag);
     +negociar(Ag, P, T, 4);
     .send(Ag, achieve, negociar(P, T)).
 
 +ofertaAceita[source(Ag)] : .concat("", Ag, A) <-
-    .print("A vaga 1 será ocupada");
-    ?vagasLivres(Qtd);
-    -+vagasLivres(Qtd-1);
-    .send(A, tell, vagaEstacionar(1));
+    ?pedidoEstacionamento(A, _, Spot);
+    .print("A vaga ", Spot," será ocupada");
+    .send(A, tell, vagaEstacionar(Spot));
     -negociar(A, _, _, _);
     -ofertaAceita[source(Ag)];
-    -pedidoEstacionamento(A, _).
+    -pedidoEstacionamento(A, _, _).
 
 +ofertaRejeitada[source(Ag)] : .concat("", Ag, A) & negociar(A, P, E, Tentativas) & Tentativas > 0 <-
-    .print("O agente ", Ag, " rejeitou a proposta, enviando contraproposta");
+    .print("O agente ", Ag, " rejeitou a proposta, enviando contraproposta, Preço : ", P-1);
     -negociar(A, _, _, _);
     +negociar(A, P-1, E, Tentativas-1);
     -ofertaRejeitada[source(Ag)];
     .send(Ag, achieve, negociar(P-1, E)).
 
-+ofertaRejeitada[source(Ag)]: .concat("", Ag, A) <-
-    .print("Nao foi possivel negociar com o agente ", Ag);
++ofertaRejeitada[source(Ag)]: .concat("", Ag, A) & pedidoEstacionamento(A, _, Spot) <-
+    .print("Nao foi possivel negociar com o agente ", Ag, " excluindo a reserva da vaga ", Spot);
     -negociar(A, _, _, _);
     -ofertaRejeitada[source(Ag)];
-    -pedidoEstacionamento(A, _);
+    clearReservation(Spot);
+    -pedidoEstacionamento(A, _, _);
     .send(A, tell, cancelarNegociacao).
 
-+cancelarOferta[source(Ag)]: .concat("", Ag, A) <-
-    .print("Cancelando a requisicao do agente ", Ag);
++cancelarOferta[source(Ag)]: .concat("", Ag, A) & pedidoEstacionamento(A, _, Spot) <-
+    .print("Cancelando a requisicao do agente ", Ag, " e a reserva da vaga ", Spot);
     -negociar(A, _, _, _);
     -cancelarOferta[source(Ag)];
-    -pedidoEstacionamento(A, _).
+    clearReservation(Spot);
+    -pedidoEstacionamento(A, _, _).
 
-+!liberarVaga(V)[source(Ag)] <-
-    ?vagasLivres(Qtd);
-    -+vagasLivres(Qtd+1);
-    .print("Liberando a vaga ", V);
-    !controlar. 
++vagaLiberada <-
+    .print("Foi liberada uma vaga, checando para ver se há carros esperando para estacionar").
+
+
+// +!liberarVaga(V)[source(Ag)] <-
+//     ?vagasLivres(Qtd);
+//     -+vagasLivres(Qtd+1);
+//     .print("Liberando a vaga ", V);
+//     !controlar. 
 
 +!controlar <-
     .print("Esperando pedidos de vagas");

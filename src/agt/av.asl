@@ -8,32 +8,34 @@ tempoPermanencia(15).
 !trafegar.
 
 +!trafegar <-
-    .print("O agente está em circulacao");
+    .print("O agente está em circulação.");
     .wait(1000);
     !estacionar.
 
 
 +!estacionar : .my_name(N) & prioritario(P) & tempoPermanencia(T) <-
-    .print("O agente deseja estacionar");
-    !locateFilaEntrada(Id);
-    focus(Id);
+    .print("O agente deseja estacionar.");
+    !locateFilaEntrada(IdFila);
+    focus(IdFila);
+    !locateVagas(IdVagas);
+    focus(IdVagas);
     requestParking(N, P, T);
-    .print("Esperando pela oferta do estacionamento");
+    .print("Esperando pela oferta do estacionamento.");
     .wait(negociar(Preco, TempoEspera)).
 
 
 +!negociar(_, TempoEspera)[source(controlador)] : tempoEsperaMaximo(T) & TempoEspera > T <-
-    .print("O tempo de espera é maior do que o que eu posso aceitar");
-    .print("Cancelando o pedido de estacionamento");
+    .print("O tempo de espera é maior do que o que eu posso aceitar.");
+    .print("Cancelando o pedido de estacionament.");
     !cancelarOferta.
 
 
 +!negociar(Preco, TempoEspera)[source(controlador)] <- 
     ?calcularUtilidade(Preco, TempoEspera, Util);
-    .print("Utilidade da oferta", Util);
+    .print("Utilidade da oferta é: ", Util);
     if (Util > 0.7) {
         .print("A oferta fornece uma utilidade razoável para mim.");
-        .print("Preco por hora : ", Preco, " Tmpo Espera: ", TempoEspera);
+        .print("Preco por hora : ", Preco, " Tempo Espera: ", TempoEspera, " minutos.");
         !aceitarOferta;
     } else {
         .print("A oferta não é razoável para mim");
@@ -52,10 +54,13 @@ tempoPermanencia(15).
     .wait(cancelarNegociacao).
 
 
-+vagaEstacionar(V)[source(controlador)] <-
++vagaEstacionar(V)[source(controlador)] : .my_name(X) & tempoPermanencia(T) <-
     .print("Estacionando o veículo na vaga, ", V);
-    .wait(1000);
-    .send(controlador, achieve, liberarVaga(V));
+    park(V, X, T);
+    ?tempoPermanencia(T);
+    .wait(1000 *  T);
+    // .send(controlador, achieve, liberarVaga(V));
+    unpark(V);
     -vagaEstacionar(V)[source(controlador)];
     .print("Saindo do estacionamento");
     !trafegar.
@@ -87,3 +92,11 @@ tempoPermanencia(15).
 -!locateFilaEntrada(Id) <-
     .wait(10);
     !locateFilaEntrada.
+
++!locateVagas(Id) <-
+    lookupArtifact("vagas", Id).
+
+-!locateVagas(Id) <-
+    .wait(10);
+    !locateVagas.
+
