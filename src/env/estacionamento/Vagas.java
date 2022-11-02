@@ -42,9 +42,7 @@ public class Vagas extends Artifact {
         for (int i = 0; i < size; ++i) {
             tempo.add(carrosEstacionados.get(i).getRemainingTime(now));
         }
-        System.out.println(tempo.toString());
         int pos = Integer.max(posicao, size - 1);
-        System.out.println("POsa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa " + pos);
         tempoEspera.set(tempo.get(pos));
 
     }
@@ -59,8 +57,10 @@ public class Vagas extends Artifact {
 
     @OPERATION
     void clearReservation(int spot) {
-        carrosEstacionados.set(spot, null);
-        signal(vagaLiberada);
+        if (spot >= 0) {
+            carrosEstacionados.set(spot, null);
+            signal(vagaLiberada);
+        }
     }
 
     @OPERATION

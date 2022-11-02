@@ -1,6 +1,6 @@
 precoMinimo(6).
 precoDesejado(10).
-parkingSize(5).
+parkingSize(10).
 
 
 !start.
@@ -61,7 +61,7 @@ parkingSize(5).
     -ofertaRejeitada[source(Ag)];
     .send(Ag, achieve, negociar(P-1, E)).
 
-+ofertaRejeitada[source(Ag)]: .concat("", Ag, A) & negociar(A, _, _, _, _)<-
++ofertaRejeitada[source(Ag)]: .concat("", Ag, A) & negociar(A, _, _, Spot, _)<-
     .print("Nao foi possivel negociar com o agente ", Ag, " excluindo a reserva da vaga ", Spot);
     -negociar(A,_, _, _, _);
     -ofertaRejeitada[source(Ag)];
