@@ -1,8 +1,7 @@
 l_precoLimite([8,9,10,11,12]).
-l_bomPreco([3,4,5]).
-l_tempoPermanencia([3,4,5,6,7,8,9,20]).
-l_prioritario([true, false]).
-l_tempoEspera([5, 10, 15, 20]).
+l_bomPreco([4,5,6,7,8]).
+l_tempoPermanencia([5,10,15,20,25,30]).
+l_tempoEspera([5, 10, 15, 20, 25, 30]).
 
 
 !config.
@@ -15,17 +14,22 @@ l_tempoEspera([5, 10, 15, 20]).
     .random(Bp, BomP);
     ?l_tempoPermanencia(TP);
     .random(TP, TempoP);
-    ?l_prioritario(Pr);
-    .random(Pr, Priori);
     ?l_tempoEspera(TE);
     .random(TE, TempoEspera);
     .random(Peso);
     +precoMaximo(PrecoL);
     +bomPrecoEstacionamento(BomP);
     +tempoPermanencia(TempoP);
-    +prioritario(Priori);
     +tempoEsperaMaximo(TempoEspera);
     +peso(Peso);
+    .random(T);
+    +tempoTrafego(T * 10000);
+    if(.random(X) & X > 0.9) {
+        +prioritario(true);
+        .print("PRIORITARIO");
+    } else {
+        +prioritario(false);
+    }
     -l_precoLimite([10,11,12,13,14,15]);
     -l_bomPreco([3,4,5,6,7,8,9,10]);
     -l_tempoPermanencia([3,4,5,6,7,8,9,20]);
@@ -34,9 +38,9 @@ l_tempoEspera([5, 10, 15, 20]).
 
     !trafegar.
 
-+!trafegar <-
++!trafegar : tempoTrafego(T) <-
     .print("O agente está em circulação.");
-    .wait(1000);
+    .wait(T);
     !estacionar.
 
 
@@ -109,7 +113,8 @@ l_tempoEspera([5, 10, 15, 20]).
     ?bomPrecoEstacionamento(B);
     ?precoMaximo(M);
     ?tempoEsperaMaximo(T);
-    Temp = (M - B) / 10 * 3 + B;
+    ?peso(P);
+    Temp = (M - B) / 10 * (1-P) + B;
     Util = Temp / Preco.
 
 +?calcularUtilidade(Preco, TempoEspera, Util) <-
@@ -117,9 +122,9 @@ l_tempoEspera([5, 10, 15, 20]).
     ?precoMaximo(M);
     ?tempoEsperaMaximo(T);
     ?peso(P);
-    Temp = (M - B) / 10 * 3 + B;
+    Temp = (M - B) / 10 * P + B;
     A = Temp / Preco;
-    Util = P * A + (1 - P) * (T - TempoEspera) / T.
+    Util = P * A + (P - 1) * (TempoEspera) / T.
 
 +!locateFilaEntrada(Id) <-
     lookupArtifact("filaEntrada", Id).

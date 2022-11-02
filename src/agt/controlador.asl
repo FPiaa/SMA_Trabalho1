@@ -1,6 +1,6 @@
 precoMinimo(6).
 precoDesejado(10).
-parkingSize(10).
+parkingSize(20).
 
 
 !start.

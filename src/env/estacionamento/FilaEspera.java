@@ -1,7 +1,8 @@
 package estacionamento;
 
 import java.util.Iterator;
-import java.util.PriorityQueue;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import cartago.Artifact;
 import cartago.OPERATION;
@@ -9,7 +10,7 @@ import cartago.OpFeedbackParam;
 import model.AgentRequest;
 
 public class FilaEspera extends Artifact {
-    PriorityQueue<AgentRequest> fila = new PriorityQueue<AgentRequest>();
+    Queue<AgentRequest> fila = new LinkedList<>();
 
     void init() {
 
@@ -38,7 +39,9 @@ public class FilaEspera extends Artifact {
         int total = 0;
         while (i.hasNext()) {
             AgentRequest a = i.next();
-            total += a.duration;
+            if (a != null) {
+                total += a.duration;
+            }
         }
         time.set(total);
     }
