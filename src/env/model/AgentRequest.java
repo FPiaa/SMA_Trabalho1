@@ -6,13 +6,13 @@ public class AgentRequest implements Comparable<AgentRequest> {
     public String nome;
     Boolean prioritario;
     LocalDateTime dataRequisicao;
-    public LocalDateTime finalEstadia;
+    public int duration;
 
     public AgentRequest(String nome, boolean prioritario, int duration) {
         this.nome = nome;
         this.prioritario = prioritario;
         dataRequisicao = LocalDateTime.now();
-        finalEstadia = dataRequisicao.plusMinutes(duration);
+        this.duration = duration;
     }
 
     @Override

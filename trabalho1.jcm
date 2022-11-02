@@ -15,7 +15,7 @@
 mas trabalho1 {
 
     agent av {
-        instances: 2
+        instances: 5
     }
     agent controlador
 

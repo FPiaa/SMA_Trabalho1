@@ -25,12 +25,12 @@ public class FilaEntrada extends Artifact {
     }
 
     @OPERATION
-    void popRequestParking(OpFeedbackParam<String> name, OpFeedbackParam<String> dataSaida) {
+    void popRequestParking(OpFeedbackParam<String> name, OpFeedbackParam<Integer> duration) {
         // não é problematico ser null,
         // essa função só será chamada quando o agente controlador
         // receber o sinal de que alguem chegou para estacionar.
         AgentRequest a = filaEntrada.poll();
         name.set(a.nome);
-        dataSaida.set(a.finalEstadia.toString());
+        duration.set(a.duration);
     }
 }

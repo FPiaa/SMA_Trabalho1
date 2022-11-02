@@ -2,7 +2,7 @@ bomPrecoEstacionamento(6).
 precoMaximo(12).
 tempoEsperaMaximo(10).
 prioritario(false).
-tempoPermanencia(15).
+tempoPermanencia(1).
 
 
 !trafegar.
