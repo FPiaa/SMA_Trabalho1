@@ -1,5 +1,6 @@
 package estacionamento;
 
+import java.util.Iterator;
 import java.util.PriorityQueue;
 
 import cartago.Artifact;
@@ -29,5 +30,16 @@ public class FilaEspera extends Artifact {
     @OPERATION
     void waitSize(OpFeedbackParam<Integer> size) {
         size.set(fila.size());
+    }
+
+    @OPERATION
+    void waitTime(OpFeedbackParam<Integer> time) {
+        Iterator<AgentRequest> i = fila.iterator();
+        int total = 0;
+        while (i.hasNext()) {
+            AgentRequest a = i.next();
+            total += a.duration;
+        }
+        time.set(total);
     }
 }

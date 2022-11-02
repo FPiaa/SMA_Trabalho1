@@ -1,40 +1,42 @@
 precoMinimo(6).
 precoDesejado(10).
+parkingSize(5).
 
 
 !start.
 
-+!start <-
++!start : parkingSize(P) <-
     makeArtifact("filaEntrada", "estacionamento.FilaEntrada", [], IdFilaEntrada);
     focus(IdFilaEntrada);
-    makeArtifact("vagas", "estacionamento.Vagas", [2], IdVagas);
+    makeArtifact("vagas", "estacionamento.Vagas", [P], IdVagas);
     focus(IdVagas);
     makeArtifact("filaEspera", "estacionamento.FilaEspera", [], IdFilaEspera);
     focus(IdFilaEspera);
     .print("O agente já está observando a fila de entrada").
 
-+novoVeiculo <-
++novoVeiculo : parkingSize(P) <-
     popRequestParking(Ag, Duration, Prioritario);
     +agentePrioritario(Ag, Prioritario, Duration);
     numberOfEmptySpots(X);
     if (X > 0) {
         reserveSpot(Ag, Duration, Spot);
-        !pedidoEstacionamento(Ag, Spot);
+        !pedidoEstacionamento(Ag, Spot, P - X - 1);
     } else {
-        !pedidoEstacionamento(Ag, -1);
+        !pedidoEstacionamento(Ag, -1, P - X - 1);
     }.
 
 
-+!pedidoEstacionamento(Ag,Spot): Spot >= 0 & precoDesejado(P) <-
++!pedidoEstacionamento(Ag,Spot, _): Spot >= 0 & precoDesejado(P) <-
     .print("O estacionamento possui vagas, enviando o preco ", P, " para o agente ", Ag);
     +negociar(Ag, P, 0, Spot, 4);
     .send(Ag, achieve, negociar(P, 0)).
 
-+!pedidoEstacionamento(Ag, Spot): Spot < 0 & precoDesejado(P) <-
-    getWaitTime(T);
++!pedidoEstacionamento(Ag, Spot, X): Spot < 0 & precoDesejado(P) <-
+    getWaitTime(X, T);
+    waitTime(F);
     .print("O estacionamento está lotado, enviando o preco ", P, " e o tempo de espera ", T, " minutos para ", Ag);
-    +negociar(Ag, P, T, Spot, 4);
-    .send(Ag, achieve, negociar(P, T)).
+    +negociar(Ag, P, T+ F, Spot, 4);
+    .send(Ag, achieve, negociar(P, T + F)).
 
 
 +ofertaAceita[source(Ag)] : .concat("", Ag, A) & negociar(A, _, _, Spot, _) & Spot >= 0<-
@@ -48,6 +50,7 @@ precoDesejado(10).
 +ofertaAceita[source(Ag)] : .concat("", Ag, A) & negociar(A, _, _, Spot, _) & Spot < 0 & agentePrioritario(A, P, D)<-
     .print("O agente ", A, " está esperando por uma vaga.");
     enqueue(A, P, D);
+    -negociar(A, _, _, _ ,_);
     -agentePrioritario(A, P , D);
     -ofertaAceita[source(Ag)].
 

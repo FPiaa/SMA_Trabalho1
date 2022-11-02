@@ -34,7 +34,7 @@ public class Vagas extends Artifact {
     }
 
     @OPERATION
-    void getWaitTime(OpFeedbackParam<Long> tempoEspera) {
+    void getWaitTime(int posicao, OpFeedbackParam<Long> tempoEspera) {
 
         LocalDateTime now = LocalDateTime.now();
         int size = carrosEstacionados.size();
@@ -43,7 +43,9 @@ public class Vagas extends Artifact {
             tempo.add(carrosEstacionados.get(i).getRemainingTime(now));
         }
         System.out.println(tempo.toString());
-        tempoEspera.set(tempo.get(0));
+        int pos = Integer.max(posicao, size - 1);
+        System.out.println("POsa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa " + pos);
+        tempoEspera.set(tempo.get(pos));
 
     }
 
