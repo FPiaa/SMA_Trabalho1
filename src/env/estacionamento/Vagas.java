@@ -3,7 +3,6 @@ package estacionamento;
 import cartago.*;
 import model.AgentParked;
 
-import java.util.Random;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -36,19 +35,15 @@ public class Vagas extends Artifact {
 
     @OPERATION
     void getWaitTime(OpFeedbackParam<Long> tempoEspera) {
-        if (carrosEstacionados.stream().filter(x -> x == null).findAny().isPresent()) {
-            System.out.println(
-                    "Não deveria ocorrer, o tempo remanescente só deve ser chamado quando o estacionamento estiver totalmente cheio");
-            tempoEspera.set(0l);
-            return;
-        }
+
         LocalDateTime now = LocalDateTime.now();
-        tempoEspera.set(
-                carrosEstacionados.stream()
-                        .map(x -> x.getRemainingTime(now))
-                        .sorted()
-                        .findFirst()
-                        .get());
+        int size = carrosEstacionados.size();
+        ArrayList<Long> tempo = new ArrayList<>(size);
+        for (int i = 0; i < size; ++i) {
+            tempo.add(carrosEstacionados.get(i).getRemainingTime(now));
+        }
+        System.out.println(tempo.toString());
+        tempoEspera.set(tempo.get(0));
 
     }
 

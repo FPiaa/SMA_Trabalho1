@@ -11,12 +11,12 @@ public class AgentParked {
     public AgentParked(String nome, int duration) {
         this.nome = nome;
         this.duration = duration;
-        dataSaida = LocalDateTime.now().plusMinutes(duration);
+        dataSaida = LocalDateTime.now().plusSeconds(duration);
     }
 
     public long getRemainingTime(LocalDateTime current) {
         Duration dur = Duration.between(LocalDateTime.now(), dataSaida);
-        return dur.toSeconds() / 60;
+        return dur.toSeconds();
     }
 
     public boolean equals(Object o) {
