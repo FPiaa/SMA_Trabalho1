@@ -9,10 +9,13 @@ precoDesejado(10).
     focus(IdFilaEntrada);
     makeArtifact("vagas", "estacionamento.Vagas", [2], IdVagas);
     focus(IdVagas);
+    makeArtifact("filaEspera", "estacionamento.FilaEspera", [], IdFilaEspera);
+    focus(IdFilaEspera);
     .print("O agente já está observando a fila de entrada").
 
 +novoVeiculo <-
-    popRequestParking(Ag, Duration);
+    popRequestParking(Ag, Duration, Prioritario);
+    +agentePrioritario(Ag, Prioritario, Duration);
     numberOfEmptySpots(X);
     if (X > 0) {
         reserveSpot(Ag, Duration, Spot);
@@ -38,11 +41,14 @@ precoDesejado(10).
     .print("A vaga ", Spot," será ocupada pelo agente ", A);
     .send(A, tell, vagaEstacionar(Spot));
     -negociar(A,_, _, _, _);
+    -agentePrioritario(A, _, _);
     -ofertaAceita[source(Ag)].
     
 
-+ofertaAceita[source(Ag)] : .concat("", Ag, A) & negociar(A, _, _, Spot, _) & Spot < 0<-
++ofertaAceita[source(Ag)] : .concat("", Ag, A) & negociar(A, _, _, Spot, _) & Spot < 0 & agentePrioritario(A, P, D)<-
     .print("O agente ", A, " está esperando por uma vaga.");
+    enqueue(A, P, D);
+    -agentePrioritario(A, P , D);
     -ofertaAceita[source(Ag)].
 
 +ofertaRejeitada[source(Ag)] : .concat("", Ag, A) & negociar(A, P, E, Spot, Tentativas) & Tentativas > 0 <-
@@ -56,14 +62,21 @@ precoDesejado(10).
     .print("Nao foi possivel negociar com o agente ", Ag, " excluindo a reserva da vaga ", Spot);
     -negociar(A,_, _, _, _);
     -ofertaRejeitada[source(Ag)];
+    -agentePrioritario(A, _, _);
     clearReservation(Spot);
     .send(A, tell, cancelarNegociacao).
 
 +cancelarOferta[source(Ag)]: .concat("", Ag, A) & pedidoEstacionamento(A, Spot) <-
     .print("Cancelando a requisicao do agente ", Ag);
     -negociar(A, _, _, _, _);
+    -agentePrioritario(A, _, _);
     -cancelarOferta[source(Ag)];
     -pedidoEstacionamento(A, _).
 
-+vagaLiberada <-
-    .print("Foi liberada uma vaga, checando para ver se há carros esperando para estacionar").
++vagaLiberada(V) <-
+    waitSize(X);
+    if(X > 0) {
+        dequeue(A);
+        .print("Foi liberada a vaga ", V, " e enviada para o agente ", A);
+        .send(A, tell, vagaEstacionar(V));
+    }.

@@ -71,7 +71,7 @@ public class Vagas extends Artifact {
     @OPERATION
     void unpark(int spot) {
         carrosEstacionados.set(spot, null);
-        signal(vagaLiberada);
+        signal(vagaLiberada, spot);
     }
 
     @OPERATION

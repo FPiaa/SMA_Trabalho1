@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public class AgentRequest implements Comparable<AgentRequest> {
     public String nome;
-    Boolean prioritario;
+    public Boolean prioritario;
     LocalDateTime dataRequisicao;
     public int duration;
 
