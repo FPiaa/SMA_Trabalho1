@@ -22,8 +22,6 @@ l_tempoEspera([5, 10, 15, 20, 25, 30]).
     +tempoPermanencia(TempoP);
     +tempoEsperaMaximo(TempoEspera);
     +peso(Peso);
-    .random(T);
-    +tempoTrafego(T * 10000);
     if(.random(X) & X > 0.9) {
         +prioritario(true);
         .print("PRIORITARIO");
@@ -38,9 +36,10 @@ l_tempoEspera([5, 10, 15, 20, 25, 30]).
 
     !trafegar.
 
-+!trafegar : tempoTrafego(T) <-
++!trafegar <-
     .print("O agente está em circulação.");
-    .wait(T);
+    .random(T);
+    .wait(T * 10000);
     !estacionar.
 
 

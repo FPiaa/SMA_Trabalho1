@@ -9,11 +9,9 @@ import model.AgentRequest;
 
 public class FilaEntrada extends Artifact {
     PriorityQueue<AgentRequest> filaEntrada = new PriorityQueue<>();
-    static String requisicao = "requisicao";
     static String sinal = "novoVeiculo";
 
     void init() {
-        defineObsProperty(requisicao);
     }
 
     @OPERATION
